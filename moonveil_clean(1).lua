@@ -113,19 +113,6 @@ addTheme("Yellow (Nijika)", {
         Stroke = ColorSequence.new({ ColorSequenceKeypoint.new(0, Color3.fromRGB(220, 170, 60)), ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 220, 120)), ColorSequenceKeypoint.new(1, Color3.fromRGB(220, 170, 60)) }) },
     Background = "rbxassetid://90908656139712", BackgroundTransparency = 0.15,
 })
-if #themes == 0 then themes = {"Dark", "Light", "Blood Red", "Amoled", "EmeraldDark", "NeonBlue", "Sunset", "SlateAnimated"} _G.Theme = "Dark" end
-local defaultTheme = table.find(themes, "Pink (Bocchi)") and "Pink (Bocchi)" or themes[1]
-local isMobile = UserInputService.TouchEnabled
-local windowSize = isMobile and UDim2.fromOffset(480, 380) or UDim2.fromOffset(640, 520)
-local Window = Fluent:CreateWindow({
-    Title = "Hello, " .. LocalPlayer.Name,
-    SubTitle = "MM2",
-    TabWidth = isMobile and 110 or 150,
-    Size = windowSize,
-    Acrylic = true,
-    Theme = defaultTheme,
-    MinimizeKey = Enum.KeyCode.RightShift
-})
 -- round the theme/background image so it follows the window corners (no square edges)
 local WINDOW_CORNER = UDim.new(0, 8)
 local function roundThemeImage(obj)
@@ -502,111 +489,7 @@ sBIKzPS1TfcODT0b9r/JAM+e0Jo1a2RfX58GAStfe8Sr9YR4P2r2DBsLkegEVuvYaDhxYj+0a2jbP2AG
 CgxuGtm8e+fwN2Yv7vqZrtmctfYIJiibHsgfT05O/BwzsBOwKQeLFCCms+/SxUtPWbRo0XsXLlq4df78+VfUP9ws1D3fzQLykNOB
 MGfOnMPmLZ636tk0z/8fFBBSMCxfnnYAAAAASUVORK5CYII=
 ]=])
-local quickGui = Instance.new("ScreenGui")
-quickGui.Name = "QuickButtons"
-quickGui.ResetOnSpawn = false
-quickGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-quickGui.DisplayOrder = 100
-quickGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-local QB_SIZE = isMobile and 58 or 64
-local quickButtons = {}   -- key -> button
-local quickHidden = {}    -- key -> true when hidden from the menu
-local quickLocked = false
-local function setQuickLocked(state)
-    quickLocked = state
-    for _, b in pairs(quickButtons) do b:SetAttribute("Locked", state) end
 end
-local function setQuickHidden(key, hidden)
-    quickHidden[key] = hidden or nil
-    local b = quickButtons[key]
-    if b then b.Visible = not hidden end
-end
-local function removeQuickButton(key)
-    local b = quickButtons[key]
-    if b then b:Destroy() quickButtons[key] = nil end
-end
-local function makeQuickButton(key, label, sub, x, y, action, icon)
-    removeQuickButton(key)
-    local btn = Instance.new("TextButton")
-    btn.Name = key
-    btn.AnchorPoint = Vector2.new(1, 1)
-    btn.Position = UDim2.new(1, x, 1, y)
-    btn.Size = UDim2.fromOffset(QB_SIZE, QB_SIZE)
-    btn.AutoButtonColor = false
-    btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    btn.BackgroundTransparency = 0.45
-    btn.Font = Enum.Font.GothamBold
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextTransparency = 0.1
-    btn.TextSize = isMobile and 18 or 20
-    btn.Text = icon and "" or label
-    btn.Parent = quickGui
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(1, 0)
-    corner.Parent = btn
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = Color3.fromRGB(255, 255, 255)
-    stroke.Transparency = 0.6
-    stroke.Thickness = 2
-    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    stroke.Parent = btn
-    if icon then
-        local img = Instance.new("ImageLabel")
-        img.Name = "Icon"
-        img.BackgroundTransparency = 1
-        img.AnchorPoint = Vector2.new(0.5, 0.5)
-        img.Position = UDim2.fromScale(0.5, 0.5)
-        img.Size = UDim2.fromScale(0.68, 0.68)
-        img.ScaleType = Enum.ScaleType.Fit
-        img.Image = icon
-        img.Parent = btn
-    end
-    local subLabel = Instance.new("TextLabel")
-    subLabel.BackgroundTransparency = 1
-    subLabel.AnchorPoint = Vector2.new(0.5, 0)
-    subLabel.Position = UDim2.new(0.5, 0, 1, 2)
-    subLabel.Size = UDim2.fromOffset(QB_SIZE + 20, 14)
-    subLabel.Text = sub
-    subLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    subLabel.TextTransparency = 0.2
-    subLabel.TextStrokeTransparency = 0.5
-    subLabel.Font = Enum.Font.GothamMedium
-    subLabel.TextSize = 11
-    subLabel.Parent = btn
-    -- a drag must not count as a tap
-    local startPos, moved = nil, false
-    btn.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            startPos, moved = input.Position, false
-            btn.BackgroundTransparency = 0.25
-        end
-    end)
-    btn.InputChanged:Connect(function(input)
-        if startPos and not btn:GetAttribute("Locked")
-            and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch)
-            and (input.Position - startPos).Magnitude > 8 then
-            moved = true
-        end
-    end)
-    btn.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            btn.BackgroundTransparency = 0.45
-        end
-    end)
-    btn.Activated:Connect(function()
-        if not moved then action() end
-    end)
-    MakeDraggable(btn, btn, true) -- drag to move; the lock button freezes them
-    btn:SetAttribute("Locked", quickLocked)
-    btn.Visible = not quickHidden[key]
-    quickButtons[key] = btn
-    return btn
-end
-local uiVisible = true
-mainBtn.MouseButton1Click:Connect(function()
-    uiVisible = not uiVisible
-    if uiVisible then Window:Show() else Window:Hide() end
-end)
 _G.TargetTracking = {}  
 local currentRoles = {}
 local savedPlayerData = {}
@@ -1988,13 +1871,6 @@ local function grabGun()
 end
 makeQuickButton("GUN", "GUN", "Grab Gun", -200, -70, grabGun)
 makeQuickButton("STOP", "STOP", "Stop Fling", -275, -70, function() FlingActive = false end)
-makeQuickButton("MURD", "MURD", "Fling Murderer", -200, -150, function() flingRole("Murderer") end)
-makeQuickButton("SHER", "SHER", "Fling Sheriff", -275, -150, function() flingRole("Sheriff") end)
-local lockBtn
-lockBtn = makeQuickButton("LOCK", "\u{1F513}", "Lock Buttons", -350, -70, function()
-    setQuickLocked(not quickLocked)
-    lockBtn.Text = quickLocked and "\u{1F512}" or "\u{1F513}"
-    Notify("Buttons", quickLocked and "Locked in place" or "Unlocked - drag to move", "Info", nil, 2)
 end)
 Tabs.Main:AddToggle("QuickButtonsToggle", { Title = "Show Quick Buttons", Default = true, Callback = function(v)
     quickGui.Enabled = v
@@ -2002,12 +1878,8 @@ end })
 local btnVisSec = Tabs.Main:AddCollapsibleSection("Button Visibility", "lucide/eye", false)
 for _, info in ipairs({
     { "GUN", "Grab Gun" },
-    { "STOP", "Stop Fling" },
-    { "MURD", "Fling Murderer" },
-    { "SHER", "Fling Sheriff" },
     { "KNIFE", "Throw Knife" },
-    { "AIM", "Silent Aim" },
-    { "LOCK", "Lock Button" },
+    { "AIM", "Silent Aim" }
 }) do
     btnVisSec:AddToggle("QBShow" .. info[1], { Title = info[2], Default = true, Callback = function(v)
         setQuickHidden(info[1], not v)
